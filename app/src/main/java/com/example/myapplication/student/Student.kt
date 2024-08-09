@@ -1,6 +1,6 @@
 package com.example.myapplication.student
-
-open class Student(val id:String, val name:String, var english:Int =0, var math:Int = 0) {
+//access modifier:預設為public, internal:在整個模組(此專案的模組是app)可用
+public open class Student(val id:String, val name:String, var english:Int =0, var math:Int = 0) {
 //    constructor(id:String, name:String):this(id, name, 0, 0)
     companion object {
         var pass = 60
