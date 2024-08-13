@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,8 +17,12 @@ import com.example.myapplication.databinding.ActivityMainBinding
 //gradle:
 //build.gradle.kts implementation(libs.androidx.appcompat)
 class MainActivity2 : AppCompatActivity() {
+    private val tag: String = MainActivity2::class.java.simpleName
     private lateinit var binding: ActivityMainBinding
-    val secret = (1..10).random()
+
+    //    val secret = (1..10).random()
+    private val game = GuessGame()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -32,11 +37,10 @@ class MainActivity2 : AppCompatActivity() {
         //viewBinding使用layout,必須要去build.gradle.kts(Module :app)設定
         setContentView(binding.root)
 
-        Toast.makeText(this, "secret: $secret", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "secret: ${game.secret}", Toast.LENGTH_LONG).show()
         //約束值在activity_main.xml
         //ctrl+滑鼠左鍵決定元素位置
         //ctrl+B到元件原始碼
-
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -46,27 +50,36 @@ class MainActivity2 : AppCompatActivity() {
     }
 
     fun guess(view: View) {
-        if (binding.number.text.toString() != "") {
-            val num = binding.number.text.toString().toInt()
-            Log.d("MainActivity2", num.toString())
-            val message = if (num > secret) {
-                //resources.getString()
-                getString(R.string.smaller)
-            } else if (num < secret) {
-                getString(R.string.bigger)
-            } else {
-                getString(R.string.got_it)
+        val numString: String = binding.number.text.toString()
+        if (numString != "") {
+            val num = numString.toInt()
+            val message = when (game.guess(num)) {
+                GuessGame.Status.BIGGER -> getString(R.string.bigger)
+                GuessGame.Status.SMALLER -> getString(R.string.smaller)
+                else -> getString(R.string.got_it)
+            }
+            binding.counter.text = game.counter.toString()
+
+            val okListener = object : DialogInterface.OnClickListener {
+                override fun onClick(p0: DialogInterface?, p1: Int) {
+                    TODO("Not yet implemented")
+                }
             }
 
             AlertDialog.Builder(this)
                 .setTitle(getString(R.string.info))
                 .setMessage(message)
                 .setPositiveButton(getString(R.string.ok), null)
+                //lambda語法 取代 okListener
+                .setNegativeButton("Replay") { _, _ ->
+                    Log.d(tag, "Replay")
+                    game.reset()
+                    binding.counter.text = game.counter.toString()
+                }
                 .show()
         } else {
             Toast.makeText(this, getString(R.string.please_enter_a_number), Toast.LENGTH_LONG)
                 .show()
         }
-//        val message = if
     }
 }
