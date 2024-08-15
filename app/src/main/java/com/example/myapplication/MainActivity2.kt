@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -10,6 +9,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.example.myapplication.databinding.ActivityMainBinding
 
 //appCompatActivity好向下相容,androidx is the trend
@@ -17,6 +18,7 @@ import com.example.myapplication.databinding.ActivityMainBinding
 //gradle:
 //build.gradle.kts implementation(libs.androidx.appcompat)
 class MainActivity2 : AppCompatActivity() {
+    private lateinit var viewModel: GuessViewModel
     private val tag: String = MainActivity2::class.java.simpleName
     private lateinit var binding: ActivityMainBinding
 
@@ -36,8 +38,38 @@ class MainActivity2 : AppCompatActivity() {
         //使用findViewById還要轉換
         //viewBinding使用layout,必須要去build.gradle.kts(Module :app)設定
         setContentView(binding.root)
+        //取得viewmodel
+        viewModel = ViewModelProvider(this).get(GuessViewModel::class.java)
+        viewModel.counter.observe(this) { counter ->
+            binding.counter.text = counter.toString()
+        }
 
-        Toast.makeText(this, "secret: ${game.secret}", Toast.LENGTH_LONG).show()
+        viewModel.status.observe(this) { status ->
+            val message = when (status) {
+                GameStatus.BIGGER -> getString(R.string.bigger)
+                GameStatus.SMALLER -> getString(R.string.smaller)
+                GameStatus.INIT -> ""
+                else -> getString(R.string.got_it)
+            }
+
+            if (status != GameStatus.INIT) {
+                AlertDialog.Builder(this)
+                    .setTitle(getString(R.string.info))
+                    .setMessage(message)
+                    .setPositiveButton(getString(R.string.ok), null)
+                    //lambda語法 取代 okListener
+                    .setNegativeButton("Replay") { _, _ ->
+                        Log.d(tag, "Replay")
+                        viewModel.reset()
+                    }
+                    .show()
+            }
+        }
+        viewModel.secretData.observe(this) { secret ->
+            Toast.makeText(this, "secret: $secret", Toast.LENGTH_LONG).show()
+        }
+
+
         //約束值在activity_main.xml
         //ctrl+滑鼠左鍵決定元素位置
         //ctrl+B到元件原始碼
@@ -50,6 +82,7 @@ class MainActivity2 : AppCompatActivity() {
     }
 
     fun guess(view: View) {
+        /*
         val numString: String = binding.number.text.toString()
         if (numString != "") {
             val num = numString.toInt()
@@ -81,5 +114,6 @@ class MainActivity2 : AppCompatActivity() {
             Toast.makeText(this, getString(R.string.please_enter_a_number), Toast.LENGTH_LONG)
                 .show()
         }
+        */
     }
 }

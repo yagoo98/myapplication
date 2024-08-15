@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
 }
 
 android {
@@ -51,6 +52,12 @@ android {
 }
 
 dependencies {
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    // LiveData
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    // Annotation processor
+    kapt(libs.androidx.lifecycle.compiler)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
